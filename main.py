@@ -42,13 +42,15 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    player.update(dt,keys,platforms)
+    player.collision(platforms)
+    player.update(dt)
 
     screen.fill(BACKGROUND)
 
     for platform in platforms:
         pygame.draw.rect(screen,GROUND_COLOR if platform.height > 30 else PLATFORM_COLOR, platform)
 
+    player.move(keys,dt)
     player.draw(screen)
 
     pygame.display.flip()
@@ -56,3 +58,6 @@ while running:
     # player.input()
     player.draw(screen)
     pygame.display.update()
+
+pygame.quit()
+sys.exit()
