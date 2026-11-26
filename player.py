@@ -7,7 +7,7 @@ class Player():
         self.pos = pygame.Vector2(position)
         self.rect = pygame.Rect(position[0],position[1],self.width,self.height)
 
-        self.speed = 180
+        self.speed = 200
 
         self.velocity = pygame.Vector2(0,0)
 
@@ -27,57 +27,73 @@ class Player():
     def move(self,keys,dt):
         self.velocity.x = 0
         if keys[pygame.K_a]:
-            self.rect.x -= self.speed * dt
+            self.velocity.x -= self.speed 
 
         if keys[pygame.K_d]:
-            self.rect.x += self.speed * dt 
+            self.velocity.x += self.speed
 
-    def collision(self,platforms):
-        for platform in platforms:
+    # def collision(self,platforms):
+    #     for platform in platforms:
  
-            if self.collision_rect.colliderect(platform):
-                if self.velocity.y > 0:
-                    self.rect.bottom = platform.top 
-                    self.grounded = True
-                elif self.velocity.y < 0:
-                    self.rect.top = platform.bottom
-                    self.collision_rect = self.rect.x + 1
+    #         if self.collision_rect.colliderect(platform):
+    #             if self.velocity.y > 0:
+    #                 self.rect.bottom = platform.top 
+    #                 self.grounded = True
+    #             elif self.velocity.y < 0:
+    #                 self.rect.top = platform.bottom
+    #                 self.collision_rect = self.rect.x + 1
 
-                self.pos.y = self.rect.y
-                self.velocity.y = 0
+    #             self.pos.y = self.rect.y
+    #             self.velocity.y = 0
+
+    #     for platform in platforms:
+    #         if self.collision_rect.colliderect(platform):
+    #             if self.velocity.x > 0:
+    #                 self.rect.right = platform.left 
+    #             elif self.velocity.x < 0:
+    #                 self.rect.left = platform.right
+
+    #             self.velocity.x = 0
+    #             self.pos.x = self.rect.x
+
+    def update(self, dt, platforms):
+
+        # Horizontal collision
+        self.pos.x += self.velocity.x * dt
+        self.collision_rect.x = round(self.pos.x)
 
         for platform in platforms:
             if self.collision_rect.colliderect(platform):
                 if self.velocity.x > 0:
-                    self.rect.right = platform.left 
+                    self.collision_rect.right = platform.left
                 elif self.velocity.x < 0:
-                    self.rect.left = platform.right
+                    self.collision_rect.left = platform.right
 
-                self.velocity.x = 0
-                self.pos.x = self.rect.x
-
-    def update(self, dt):
-
-        # for platform in platforms:
-        #     if self.rect.colliderect(platform):
-        #         if self.velocity.x > 0:
-        #             self.rect.right = platform.left
-        #         elif self.velocity.x < 0:
-        #             self.rect.left = platform.right
-
-        #         self.pos.x = self.rect.x
-        #         self.velocity.x = 0
+                self.pos.x = self.collision_rect.x
 
         self.velocity.y += self.gravity * dt
         self.velocity.y = min(self.velocity.y, self.max_fall_speed)
 
         self.pos.y += self.velocity.y * dt
-        self.rect.y = round(self.pos.y)
+        self.collision_rect.y = round(self.pos.y)
 
-        self.grounded = False
+        for platform in platforms:
 
-        
+            if self.collision_rect.colliderect(platform):
+                if self.velocity.y > 0:
+                    self.collision_rect.bottom = platform.top 
+                    self.grounded = True
+
+                elif self.velocity.y < 0:
+                    self.collision_rect.top = platform.bottom
+
+                self.pos.y = self.collision_rect.y
+                self.velocity.y = 0
+        self.rect.topleft = self.collision_rect.topleft
 
     def draw(self,surface):
         pygame.draw.rect(surface,'red',self.rect)
+
+        pygame.draw.rect(surface, "green", self.collision_rect, 1)
+        print(self.grounded, self.velocity.y)
 
